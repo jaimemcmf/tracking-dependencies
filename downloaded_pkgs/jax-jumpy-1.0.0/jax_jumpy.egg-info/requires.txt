@@ -1,8 +1,0 @@
-numpy>=1.18.0
-
-[jax]
-jax>=0.3.24
-jaxlib>=0.3.24
-
-[testing]
-pytest==7.1.3

@@ -1,1 +1,0 @@
-0	None###0-._.-._.-._.-._.-._.-._.-0	None###000	000-0.0.0###numpy	numpy-1.24.3###six	six-1.16.0###python-dateutil	python-dateutil-2.8.2###pytz	pytz-2023.3###tzdata	tzdata-2023.3###pandas	pandas-2.0.1###0.0.1	0.0.1-0.0.1###00101s	None###00print_lol	00print_lol-1.1.0###00SMALINUX	None###

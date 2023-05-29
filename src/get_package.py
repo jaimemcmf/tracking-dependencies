@@ -1,6 +1,8 @@
 """main file rn"""
 import os
 import re
+import sys
+import pickle
 
 from configparser import ConfigParser
 import string
@@ -17,7 +19,8 @@ import requests
 from extools import *
 from searchindex import get_pypi_packages
 
-path_to_project = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/downloaded_pkgs/'
+path_to_project = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/downloaded_pkgs/'
+path_to_source = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/src/'
 
 
 def download_package(pkg):
@@ -49,11 +52,9 @@ def download_package(pkg):
     except TimeoutError:
         return None
     
-    #with open('/Users/jaimemcmf/Downloads/' + name, 'wb') as file:
     with open(path_to_project + name, 'wb') as file:    
         file.write(request.content)
     wdir = os.getcwd()
-    #os.chdir("/Users/jaimemcmf/Downloads")
     os.chdir(path_to_project)
     os.system("tar -xzf " + name)
     os.system("rm " + name)
@@ -70,7 +71,6 @@ def find_deps(pkg):
     dependencies = []
 
     try:
-        #os.chdir("/Users/jaimemcmf/Downloads/" + pkg)
         os.chdir(path_to_project + pkg)
     except:
         return dependencies
@@ -83,7 +83,6 @@ def find_deps(pkg):
     if not has_pyproject and not has_setuppy and not has_metadata and not has_setupcfg:
         return []
 
-    #finding dependencies in pyproject.toml file
     if has_pyproject:
         with open("pyproject.toml", encoding="utf-8") as file:
             pp_toml = tomli.loads(file.read())
@@ -135,7 +134,6 @@ def find_deps(pkg):
         except:
             pass
         
-    #os.chdir("/Users/jaimemcmf/Downloads/")
     os.chdir(path_to_project)
     return dependencies
 
@@ -151,7 +149,6 @@ def find_hardcoded_urls():
 def scan(pkg):
     is_suspicious = False
     try:
-        #os.chdir("/Users/jaimemcmf/Downloads/" + pkg)
         os.chdir(path_to_project + pkg)
     except:
         os.chdir(path_to_project) 
@@ -166,17 +163,14 @@ def scan(pkg):
     try:
         if find_hardcoded_urls() and not url_in_setup() and not url_in_prints():
             is_suspicious = True
-            print("Found suspicious url")
         
         if manual_pip_install():
-            print("Found attempt of installing another package via pip")
             is_suspicious = True
     except:
         os.chdir(path_to_project) 
         return False    
     
-    
-    #os.chdir("/Users/jaimemcmf/Downloads/")
+
     os.chdir(path_to_project) 
     return is_suspicious    
 
@@ -213,18 +207,14 @@ def get_all_deps(pkg, ident):
     also analyse
     """
     
-    #os.chdir("/Users/jaimemcmf/Downloads")
     os.chdir(path_to_project)
     
     if pkg not in visited:
-        visited.add(pkg)
+        
+        visited.add(str(pkg))
         pkg_name = download_package(pkg)
         new_deps = find_deps(pkg_name)
-        f = open("teste.txt", 'a')
-        s = pkg + '\t' + str(pkg_name) + '###'
-        f.writelines(s)
-        f.close
-        
+    
         if scan(pkg_name):
             print("Potentially malicious package found -> " + pkg_name)
             os.system('mv ' + pkg_name + " ../flagged_packages")
@@ -239,16 +229,28 @@ def get_all_deps(pkg, ident):
             print(ident+dep)
             get_all_deps(dep, ident+"   ")
 
-visited = {}
-flagged = []
+
+def iter_pypi():
+    global visited
+    visited = set()
+    packages = get_pypi_packages()
+    if os.path.isfile(path_to_source + '/last_visited.txt'):
+        print('Do you wish to continue from last iteration?')
+        choice = input()
+        if choice == 'y':
+            with open(path_to_source + '/last_visited.txt', 'rb') as file:
+                visited = pickle.load(file)
+    
+    for pkg in packages:
+        try:
+            print(pkg)
+            get_all_deps(pkg, "     ")
+        except KeyboardInterrupt:
+            os.chdir(path_to_source)
+            save_visited(visited)
+            sys.exit()
+        
+
 
 if __name__ == "__main__":
-    #root = input()
-    visited = {"placeholder0"}
-    packages = get_pypi_packages()
-    for pkg in packages:
-        print(pkg)
-        get_all_deps(pkg, "   ")
-    
-    
-    #TODO keep track of index in search
+    iter_pypi()

@@ -1,6 +1,0 @@
-empty_setup.py
-1assl.egg-info/PKG-INFO
-1assl.egg-info/SOURCES.txt
-1assl.egg-info/dependency_links.txt
-1assl.egg-info/top_level.txt
-test/test_jsonpath.py

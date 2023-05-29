@@ -1,0 +1,14 @@
+README.md
+setup.py
+src/0x_middlewares.egg-info/PKG-INFO
+src/0x_middlewares.egg-info/SOURCES.txt
+src/0x_middlewares.egg-info/dependency_links.txt
+src/0x_middlewares.egg-info/namespace_packages.txt
+src/0x_middlewares.egg-info/not-zip-safe
+src/0x_middlewares.egg-info/requires.txt
+src/0x_middlewares.egg-info/top_level.txt
+src/zero_ex/__init__.py
+src/zero_ex/middlewares/__init__.py
+src/zero_ex/middlewares/local_message_signer.py
+src/zero_ex/middlewares/py.typed
+test/test_local_message_signer.py

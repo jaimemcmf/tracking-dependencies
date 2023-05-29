@@ -2,7 +2,7 @@
 import tokenize
 from called_functions import FuncCallVisitor, get_func_calls
 import ast
-import threading
+import pickle
 
 url_combinations = ['url="https://', 'url="http://', 'url = "https://', 'url = "http://', "url='https://", "url='http://", "url = 'https://", "url = 'http://"]
 
@@ -102,5 +102,7 @@ def manual_pip_install():
     
     return False
 
-def rm_downloaded():
-    pass
+def save_visited(visited):
+    with open('last_visited.txt', 'wb') as file:
+        pickle.dump(visited, file)
+    

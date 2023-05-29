@@ -1,0 +1,16 @@
+mypy_extensions
+
+[dev]
+bandit
+black
+coverage
+coveralls
+mypy
+mypy_extensions
+pycodestyle
+pydocstyle
+pylint
+pytest
+sphinx
+tox
+twine
