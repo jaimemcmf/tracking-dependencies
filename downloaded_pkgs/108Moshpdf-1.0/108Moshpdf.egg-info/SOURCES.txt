@@ -1,0 +1,4 @@
+108Moshpdf.egg-info/PKG-INFO
+108Moshpdf.egg-info/SOURCES.txt
+108Moshpdf.egg-info/dependency_links.txt
+108Moshpdf.egg-info/top_level.txt

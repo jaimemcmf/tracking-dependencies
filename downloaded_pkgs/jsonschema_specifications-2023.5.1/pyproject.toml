@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[project]
+name = "jsonschema-specifications"
+description = "The JSON Schema meta-schemas and vocabularies, exposed as a Registry"
+readme = "README.rst"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+keywords = [
+    "validation",
+    "data validation",
+    "jsonschema",
+    "json",
+    "json schema",
+]
+authors = [
+  {email = "Julian+jsonschema-specifications@GrayVines.com"},
+  {name = "Julian Berman"},
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: File Formats :: JSON :: JSON Schema",
+]
+dynamic = ["version"]
+
+dependencies = [
+  "referencing>=0.28.0",
+  "importlib_resources>=1.4.0;python_version<'3.9'",
+]
+
+[project.urls]
+Documentation = "https://jsonschema-specifications.readthedocs.io/"
+Homepage = "https://github.com/python-jsonschema/jsonschema-specifications"
+Issues = "https://github.com/python-jsonschema/jsonschema-specifications/issues/"
+Funding = "https://github.com/sponsors/Julian"
+Source = "https://github.com/python-jsonschema/jsonschema-specifications"
+
+[tool.coverage.run]
+branch = true
+source = ["jsonschema-specifications"]
+dynamic_context = "test_function"
+
+[tool.coverage.report]
+fail_under = 100
+
+[tool.doc8]
+ignore = [
+    "D001",  # one sentence per line, so max length doesn't make sense
+]
+
+[tool.isort]
+combine_as_imports = true
+ensure_newline_before_comments = true
+from_first = true
+include_trailing_comma = true
+multi_line_output = 3

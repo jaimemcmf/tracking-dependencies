@@ -1,0 +1,12 @@
+LICENSE.txt
+MANIFEST.in
+README.md
+pyproject.toml
+setup.cfg
+20XX.egg-info/PKG-INFO
+20XX.egg-info/SOURCES.txt
+20XX.egg-info/dependency_links.txt
+20XX.egg-info/requires.txt
+20XX.egg-info/top_level.txt
+melee_20XX/Melee_v0.py
+melee_20XX/__init__.py
