@@ -1,0 +1,58 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{imakeidx}
+\usepackage{indentfirst}
+\usepackage{titlesec}
+\usepackage[sorting=none]{biblatex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{wrapfig}
+\usepackage{enumitem}   
+\usepackage{graphicx}
+\usepackage{datetime}
+\usepackage{lipsum}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{newclude}
+\usepackage{listings}
+\usepackage{caption}
+
+\lstset{
+  basicstyle=\ttfamily,
+  showstringspaces=false,
+  frame=single,
+  commentstyle=\color{red},
+  keywordstyle=\color{black},
+  breaklines=true,
+  columns=fullflexible
+}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries}{}{0pt}{\Huge}
+ 
+\begin{document}
+
+\title{
+\begin{center}
+\includegraphics[width=3.75in]{images/fcuplogo.jpg}
+
+\mbox{\textbf{Tracking Dependencies}}
+\bigskip
+
+\mbox{Internship/Project final report}
+\author{Jaime Cruz Ferreira — up202008300}
+\date{June, 2023}
+\end{center}}
+
+\pagenumbering{gobble}
+\maketitle
+\tableofcontents
+
+\pagenumbering{arabic}
+
+\include{chapters/introduction}
+\include{chapters/stateoftheart}
+\include{chapters/description}
+\include{chapters/conclusion}
+
+\end{document}

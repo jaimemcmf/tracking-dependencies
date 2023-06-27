@@ -3,6 +3,8 @@ import tokenize
 from called_functions import FuncCallVisitor, get_func_calls
 import ast
 import pickle
+import re
+from collections.abc import Iterable
 
 url_combinations = ['url="https://', 'url="http://', 'url = "https://', 'url = "http://', "url='https://", "url='http://", "url = 'https://", "url = 'http://"]
 
@@ -64,6 +66,7 @@ def url_in_prints():
                 pass
     
     return False
+
     
 def url_in_setup():
     '''
@@ -75,7 +78,9 @@ def url_in_setup():
         for comb in url_combinations:
             if comb in content:
                 return True
-
+    #content2 = content.split('setup(',1)[1]
+    #urls_in_setup = re.findall('https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', content)
+    #print(urls_in_setup)
     return False
 
 def manual_pip_install():
@@ -93,7 +98,7 @@ def manual_pip_install():
     for func in calls:
         if 'getoutput' in func[0] or 'system' in func[0] or 'subprocess' in func[0]:
             try:
-                if 'pip install' in func[1]:
+                if 'pip install' in func[1] or 'pip download' in func[1]:
                     return True
             except:
                 pass
@@ -105,4 +110,11 @@ def manual_pip_install():
 def save_visited(visited):
     with open('last_visited.txt', 'wb') as file:
         pickle.dump(visited, file)
-    
+
+
+def flatten(A):
+    rt = []
+    for i in A:
+        if isinstance(i,list): rt.extend(flatten(i))
+        else: rt.append(i)
+    return rt

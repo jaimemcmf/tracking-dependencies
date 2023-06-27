@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 import os
 
-path_to_project = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/downloaded_pkgs/'
+path_to_project = '/Users/jaimemcmf/Documents/University/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/downloaded_pkgs/'
 
 def get_pypi_packages():
     

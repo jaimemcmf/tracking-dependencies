@@ -1,0 +1,16 @@
+\chapter{State of the Art}
+There has been some research regarding searching and identifying malicious packages in PyPI. The main technique used by attackers to trick users to install these libraries is to rely on typos — this is commonly called typosquatting — to successfully have the malicious code executed. When a developer attempts to download a package through pip, the smallest typing mistake may be compromising: some malicious packages have names identical names to very known and legitimate packages. In 2016, a package was named \textit{mumpy} was spotted in PyPI. This name was meant for anyone installing \textit{numpy} — a long-established library for high-level mathematical functions — to make a small mistake and accidentally installing the malicious package and, at that point, the code would be executed with no way back.
+
+\section{Finding Malicious Packages by Typosquatting Probability}
+As previously mentioned, a lot of attackers seek user mistakes in order to have these packages installed. A 2020 article by Vu, D. et al, \textit{Typosquatting and Combosquatting Attacks on the Python Ecosystem},  describes the search for these packages by having a set of known trustworthy packages and iterating PyPI looking for packages with names with a small Levenshtein distance to the ones in in set.
+
+In fact, the results of this project are conclusive as there were found many instances of malicious packages pretending to be benign ones.
+
+This project has some obstacles though. The set of known libraries has to be built but there is not any way to certainly confirm a package is safe — it either has to be manually inspected of belong in a relatively small array of widely used packages. This is a demanding task and, in case the used set is rather limited, the search may not be as effective.
+Additionally, the threshold of the Levenshtein distance has to be adequate, since a small value can restrict the search but an excessively large one will produce an unnecessarily extensive search space.
+Finally, many benign packages have similar names to other benign packages and this will lead to false positives. This means that every packaged should be manually verified.
+
+\section{Using a Sandbox}
+Sandbox is a term used to describe a safe environment with the purpose of testing software. Conversely to the approach used in this project where programs should not be executed, in this case programs will be executed in a sandbox. This allows to keep track of the behavior of the program (e.g. in case a binary file is executed, safely see what it does) and typically enables a more effective automatic analysis through, for example, tracking system calls. Furthermore, it is possible to use \textit{pip} to gather package dependencies thus having the same behavior.
+
+The problem that comes with this procedure is its unsuitability in a "real world" use case, that is, in a situation in which distinguishing safe software the conditions of a sandbox usage aren't met. 

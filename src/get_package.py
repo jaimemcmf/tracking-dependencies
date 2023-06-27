@@ -19,9 +19,8 @@ import requests
 from extools import *
 from searchindex import get_pypi_packages
 
-path_to_project = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/downloaded_pkgs/'
-path_to_source = '/Users/jaimemcmf/Documents/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/src/'
-
+path_to_project = '/Users/jaimemcmf/Documents/University/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/downloaded_pkgs/'
+path_to_source = '/Users/jaimemcmf/Documents/University/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/src/'
 
 def download_package(pkg):
     """searches, downloads and decompresses the input package from PyPI Simple API"""
@@ -92,7 +91,6 @@ def find_deps(pkg):
         if "dependencies" not in project:
             return []
         dependencies = dependencies + project["dependencies"]
-
 
     #finding dependencies in setup.py file
     if has_setuppy:
@@ -204,10 +202,13 @@ def parse_package_name(dependency):
 def get_all_deps(pkg, ident):
     """
     recursively search for dependencies and build a tree
-    also analyse
+    also analyze
     """
-    
     os.chdir(path_to_project)
+    
+    try: visited
+    except NameError:
+        visited = set()
     
     if pkg not in visited:
         
@@ -233,6 +234,7 @@ def get_all_deps(pkg, ident):
 def iter_pypi():
     global visited
     visited = set()
+    
     packages = get_pypi_packages()
     if os.path.isfile(path_to_source + '/last_visited.txt'):
         print('Do you wish to continue from last iteration?')

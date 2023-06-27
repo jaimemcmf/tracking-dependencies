@@ -1,0 +1,26 @@
+\chapter{Introduction}
+\section{Motivation}
+The Python Package Index, commonly known as PyPI, is the greatest and official software repository for the programming language Python. As of the time of writing this report, PyPI contains more than 450 thousand packages and is an essential tool for the majority of Python developers.
+Complementing PyPI, pip — a package-management system — connects to it and enables the installation and management of Python packages via the command line.
+Through some simple commands such as
+\bigskip
+\begin{lstlisting}[language=bash]
+  $ pip install *package_name*
+\end{lstlisting}
+\bigskip
+pip searches within PyPI for the asked package, downloads, installs and does the same process for every package the one before depends on — this is called a dependency.
+
+pip is able to accomplish this by forcing all PyPI packages to have a similar structure, so that the search for the dependencies occurs fluently. One of the files present in nearly all projects is a \textit{setup.py} Python file containing metadata about the package and code that ensures the successful and correct installation of the package.
+
+Using this method of installing packages, every \textit{setup.py} file is executed and a door for malicious code is opened.
+
+\section{Goals}
+Among the thousands of packages in PyPI there are some which only goal is to attack whoever installs them. The malicious code is typically present in the \textit{setup.py} file, since it is automatically executed with the \textit{pip install} and \textit{pip download} commands.
+
+The goal of this project is to build a tool that could be a replacement for part of pip's install and downloads methods: instead (or before) of executing any file, it should be able to perform a static program analysis that triggers a warning if the package to be installed is suspicious. In addition and to avoid executing any suspicious code, the dependency tree should also be built through static code analysis.
+
+\section{Complements to This Report}
+The code developed for this project is available in its entirety at \href{https://github.com/jaimemcmf/searching_pypi_deps}{my Github} — \url{https://github.com/jaimemcmf/searching_pypi_deps}.
+
+I also recorded a visual demonstration of the project, available at Youtube — \url{link to post}.
+
