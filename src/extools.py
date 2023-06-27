@@ -3,12 +3,11 @@ import tokenize
 from called_functions import FuncCallVisitor, get_func_calls
 import ast
 import pickle
-import re
-from collections.abc import Iterable
+import os
 
 url_combinations = ['url="https://', 'url="http://', 'url = "https://', 'url = "http://', "url='https://", "url='http://", "url = 'https://", "url = 'http://"]
 
-def remove_comments():
+def remove_comments(path, filename):
     '''
     removes comments and docstrings
     used so any urls in comments are not flagged
@@ -17,8 +16,10 @@ def remove_comments():
     '''
     #TODO deletes string that shouldn't be deleted
     #     particularly in package PyYAML-6.0
-    source = open('setup.py')
-    mod = open("clean_setup.py", "w")
+    os.chdir(path)
+    
+    source = open(filename)
+    mod = open('clean_'+filename, "w")
     
     out = ""
     prev_toktype = tokenize.INDENT
@@ -47,12 +48,13 @@ def remove_comments():
         last_lineno = end_line
     out = '\n'.join(l for l in out.splitlines() if l.strip())
     mod.write(out)
+    return 'clean_'+filename
 
-def url_in_prints():
+def url_in_prints(cfile):
     '''
     function to find hardcoded urls in printing functions, to exclude this cases from the suspicious
     '''
-    with open('clean_setup.py', 'r', encoding="utf-8") as file:
+    with open(cfile, 'r', encoding="utf-8") as file:
         content = file.read()
     tree = ast.parse(content)
     calls = get_func_calls(tree)
@@ -68,11 +70,11 @@ def url_in_prints():
     return False
 
     
-def url_in_setup():
+def url_in_setup(cfile):
     '''
     function to check if url parameter in setup function is used, to exclude from the suspicious
     '''
-    with open('clean_setup.py', 'r', encoding="utf-8") as file:
+    with open(cfile, 'r', encoding="utf-8") as file:
         content = file.read()
     if "setup" in content:
         for comb in url_combinations:
@@ -83,11 +85,11 @@ def url_in_setup():
     #print(urls_in_setup)
     return False
 
-def manual_pip_install():
+def manual_pip_install(cfile):
     '''
     function that tries to find attempts of pip installing "manually"
     '''
-    with open('clean_setup.py', 'r', encoding="utf-8") as file:
+    with open(cfile, 'r', encoding="utf-8") as file:
         content = file.read()
     try:
         tree = ast.parse(content)
@@ -106,6 +108,7 @@ def manual_pip_install():
                 return True
     
     return False
+
 
 def save_visited(visited):
     with open('last_visited.txt', 'wb') as file:

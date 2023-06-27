@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import pickle
+import colorama
 
 from configparser import ConfigParser
 import string
@@ -19,8 +20,8 @@ import requests
 from extools import *
 from searchindex import get_pypi_packages
 
-path_to_project = '/Users/jaimemcmf/Documents/University/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/downloaded_pkgs/'
-path_to_source = '/Users/jaimemcmf/Documents/University/Ciência de Computadores — FCUP/3rd Year/2nd Semester/Projeto/searching_pypi_deps/src/'
+path_to_project = os.path.dirname(os.getcwd())+'/downloaded_pkgs/'
+path_to_source = os.getcwd() + '/'
 
 def download_package(pkg):
     """searches, downloads and decompresses the input package from PyPI Simple API"""
@@ -135,8 +136,8 @@ def find_deps(pkg):
     os.chdir(path_to_project)
     return dependencies
 
-def find_hardcoded_urls():
-    with open('clean_setup.py', 'r', encoding="utf-8") as file:
+def find_hardcoded_urls(file):
+    with open(file, 'r', encoding="utf-8") as file:
         content = file.read()
         if 'http://' in content or 'https//' in content:
             return True
@@ -145,32 +146,33 @@ def find_hardcoded_urls():
             
 
 def scan(pkg):
-    is_suspicious = False
+    
     try:
         os.chdir(path_to_project + pkg)
     except:
         os.chdir(path_to_project) 
         return False
     
-    has_setuppy = os.path.isfile("setup.py")
-
-    if not has_setuppy:
+    if not os.path.isfile("setup.py"):
         return False
     
-    remove_comments()
     try:
-        if find_hardcoded_urls() and not url_in_setup() and not url_in_prints():
-            is_suspicious = True
+        cleanfile = remove_comments(path_to_project + pkg, 'setup.py')
+    except:
+        cleanfile = remove_comments(path_to_project, 'setup.py')
+    
+    try:
+        if find_hardcoded_urls(cleanfile) and not url_in_setup(cleanfile) and not url_in_prints(cleanfile):
+            return True
         
-        if manual_pip_install():
-            is_suspicious = True
+        if manual_pip_install(cleanfile):
+            return True
     except:
         os.chdir(path_to_project) 
         return False    
     
-
     os.chdir(path_to_project) 
-    return is_suspicious    
+    return False   
 
     
 def parse_package_name(dependency):
@@ -205,44 +207,59 @@ def get_all_deps(pkg, ident):
     also analyze
     """
     os.chdir(path_to_project)
-    
-    try: visited
+    try:
+        if pkg not in visited:
+            
+            visited.add(str(pkg))
+            pkg_name = download_package(pkg)
+            new_deps = find_deps(pkg_name)
+        
+            if scan(pkg_name):
+                print(ident + "Potentially malicious package found -> " + pkg_name)
+                os.system('mv ' + pkg_name + " ../flagged_packages")
+            else:
+                try: 
+                    os.system('rm -drf ' + str(pkg_name))
+                except Exception as e:
+                    print('Package <' + pkg_name + '>', e)
+            
+            for dep in new_deps:
+                dep = parse_package_name(dep)[0]
+                print(ident+dep)
+                get_all_deps(dep, ident+"   ")
+                
     except NameError:
-        visited = set()
-    
-    if pkg not in visited:
+            pkg_name = download_package(pkg)
+            new_deps = find_deps(pkg_name)
         
-        visited.add(str(pkg))
-        pkg_name = download_package(pkg)
-        new_deps = find_deps(pkg_name)
-    
-        if scan(pkg_name):
-            print("Potentially malicious package found -> " + pkg_name)
-            os.system('mv ' + pkg_name + " ../flagged_packages")
-        else:
-            try: 
-                os.system('rm -drf ' + str(pkg_name))
-            except Exception as e:
-                print('Package <' + pkg_name + '>', e)
-        
-        for dep in new_deps:
-            dep = parse_package_name(dep)[0]
-            print(ident+dep)
-            get_all_deps(dep, ident+"   ")
+            if scan(pkg_name):
+                print(ident + "Potentially malicious package found -> " + pkg_name)
+                os.system('mv ' + pkg_name + " ../flagged_packages")
+            else:
+                try: 
+                    os.system('rm -drf ' + str(pkg_name))
+                except Exception as e:
+                    print('Package <' + pkg_name + '>', e)
+            
+            for dep in new_deps:
+                dep = parse_package_name(dep)[0]
+                print(ident+dep)
+                get_all_deps(dep, ident+"   ")
 
 
-def iter_pypi():
+def iterate_pypi():
     global visited
     visited = set()
     
     packages = get_pypi_packages()
     if os.path.isfile(path_to_source + '/last_visited.txt'):
-        print('Do you wish to continue from last iteration?')
+        print('Do you wish to continue from last iteration? [y/n]')
         choice = input()
         if choice == 'y':
             with open(path_to_source + '/last_visited.txt', 'rb') as file:
                 visited = pickle.load(file)
     
+    print(visited)    
     for pkg in packages:
         try:
             print(pkg)
@@ -251,8 +268,3 @@ def iter_pypi():
             os.chdir(path_to_source)
             save_visited(visited)
             sys.exit()
-        
-
-
-if __name__ == "__main__":
-    iter_pypi()
