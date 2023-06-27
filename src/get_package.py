@@ -3,13 +3,12 @@ import os
 import re
 import sys
 import pickle
-import colorama
 
 from configparser import ConfigParser
 import string
 from pip._vendor import tomli
 
-
+from colorama import Fore, Style
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -18,10 +17,11 @@ from bs4 import BeautifulSoup
 import requests
 
 from extools import *
-from searchindex import get_pypi_packages
 
-path_to_project = os.path.dirname(os.getcwd())+'/downloaded_pkgs/'
 path_to_source = os.getcwd() + '/'
+path_to_downloaded = os.path.dirname(os.getcwd())+'/downloaded_packages/'
+path_to_root = os.path.dirname(os.getcwd()) + '/'
+
 
 def download_package(pkg):
     """searches, downloads and decompresses the input package from PyPI Simple API"""
@@ -52,15 +52,47 @@ def download_package(pkg):
     except TimeoutError:
         return None
     
-    with open(path_to_project + name, 'wb') as file:    
+    with open(path_to_downloaded + name, 'wb') as file:    
         file.write(request.content)
     wdir = os.getcwd()
-    os.chdir(path_to_project)
+    os.chdir(path_to_downloaded)
     os.system("tar -xzf " + name)
     os.system("rm " + name)
     os.chdir(wdir)
     
     return name.split('.tar.gz')[0]
+
+def get_pypi_packages():
+    
+    if not os.path.isfile('pypi_packages.txt'):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver=webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options)
+        driver.get("https://pypi.org/simple/")
+
+        content = driver.page_source
+        soup = BeautifulSoup(content, features="html.parser")
+        print("Getting packages names from PyPI. This may take a while...")
+        packages = soup.findAll('a')
+        out = []
+        for pkg in packages:
+            pkg = str(pkg)
+            pkg = pkg.split('>',1)[1]
+            pkg = pkg.split('<',1)[0]
+            out.append(pkg)
+        
+        with open('pypi_packages.txt', 'a') as f:
+            for pkg in out:
+                print(pkg, file=f)
+
+    packages = []
+    with open('pypi_packages.txt', 'r') as f:
+        pkgs = f.readlines()
+        for pkg in pkgs:
+            pkg = pkg.split('\n',1)[0]
+            packages.append(pkg)
+
+    return packages
 
 
     
@@ -71,7 +103,7 @@ def find_deps(pkg):
     dependencies = []
 
     try:
-        os.chdir(path_to_project + pkg)
+        os.chdir(path_to_downloaded + pkg)
     except:
         return dependencies
 
@@ -133,33 +165,35 @@ def find_deps(pkg):
         except:
             pass
         
-    os.chdir(path_to_project)
+    os.chdir(path_to_downloaded)
     return dependencies
 
 def find_hardcoded_urls(file):
     with open(file, 'r', encoding="utf-8") as file:
         content = file.read()
-        if 'http://' in content or 'https//' in content:
+        
+        hardcoded_urls = re.search('https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', content)
+        if hardcoded_urls is not None:
             return True
+        
     return False
 
-            
 
 def scan(pkg):
     
     try:
-        os.chdir(path_to_project + pkg)
+        os.chdir(path_to_downloaded + pkg)
     except:
-        os.chdir(path_to_project) 
+        os.chdir(path_to_downloaded) 
         return False
     
     if not os.path.isfile("setup.py"):
         return False
     
     try:
-        cleanfile = remove_comments(path_to_project + pkg, 'setup.py')
+        cleanfile = remove_comments(path_to_downloaded + pkg, 'setup.py')
     except:
-        cleanfile = remove_comments(path_to_project, 'setup.py')
+        cleanfile = remove_comments(path_to_downloaded, 'setup.py')
     
     try:
         if find_hardcoded_urls(cleanfile) and not url_in_setup(cleanfile) and not url_in_prints(cleanfile):
@@ -168,10 +202,10 @@ def scan(pkg):
         if manual_pip_install(cleanfile):
             return True
     except:
-        os.chdir(path_to_project) 
+        os.chdir(path_to_downloaded) 
         return False    
     
-    os.chdir(path_to_project) 
+    os.chdir(path_to_downloaded) 
     return False   
 
     
@@ -206,7 +240,7 @@ def get_all_deps(pkg, ident):
     recursively search for dependencies and build a tree
     also analyze
     """
-    os.chdir(path_to_project)
+    os.chdir(path_to_downloaded)
     try:
         if pkg not in visited:
             
@@ -215,13 +249,11 @@ def get_all_deps(pkg, ident):
             new_deps = find_deps(pkg_name)
         
             if scan(pkg_name):
-                print(ident + "Potentially malicious package found -> " + pkg_name)
-                os.system('mv ' + pkg_name + " ../flagged_packages")
+                print(f'{Fore.RED}{ident}Potentially malicious package found: {pkg_name}{Style.RESET_ALL}')
+                os.chdir(path_to_downloaded)
+                os.system('mv ' + pkg_name + " " + path_to_root+"flagged_packages/")
             else:
-                try: 
-                    os.system('rm -drf ' + str(pkg_name))
-                except Exception as e:
-                    print('Package <' + pkg_name + '>', e)
+                os.system('rm -drf ' + str(pkg_name))
             
             for dep in new_deps:
                 dep = parse_package_name(dep)[0]
@@ -231,10 +263,10 @@ def get_all_deps(pkg, ident):
     except NameError:
             pkg_name = download_package(pkg)
             new_deps = find_deps(pkg_name)
-        
+
             if scan(pkg_name):
-                print(ident + "Potentially malicious package found -> " + pkg_name)
-                os.system('mv ' + pkg_name + " ../flagged_packages")
+                print(f'{Fore.RED}{ident}Potentially malicious package found: {pkg_name}{Style.RESET_ALL}')
+                os.system('mv ' + pkg_name + " " + path_to_root+"flagged_packages/")
             else:
                 try: 
                     os.system('rm -drf ' + str(pkg_name))
@@ -253,13 +285,11 @@ def iterate_pypi():
     
     packages = get_pypi_packages()
     if os.path.isfile(path_to_source + '/last_visited.txt'):
-        print('Do you wish to continue from last iteration? [y/n]')
-        choice = input()
+        choice = input('Do you wish to continue from last iteration? [y/n]')
         if choice == 'y':
             with open(path_to_source + '/last_visited.txt', 'rb') as file:
                 visited = pickle.load(file)
     
-    print(visited)    
     for pkg in packages:
         try:
             print(pkg)

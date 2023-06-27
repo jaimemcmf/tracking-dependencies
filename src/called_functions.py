@@ -45,12 +45,3 @@ def get_func_calls(tree):
             ret.append(l)
             l.clear
     return ret
-
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', help='Input .py file', required=True)
-    args = parser.parse_args()
-    tree = ast.parse(open(args.input).read())
-    print(get_func_calls(tree))

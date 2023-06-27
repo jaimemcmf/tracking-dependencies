@@ -4,8 +4,8 @@ from called_functions import FuncCallVisitor, get_func_calls
 import ast
 import pickle
 import os
+import re
 
-url_combinations = ['url="https://', 'url="http://', 'url = "https://', 'url = "http://', "url='https://", "url='http://", "url = 'https://", "url = 'http://"]
 
 def remove_comments(path, filename):
     '''
@@ -14,8 +14,6 @@ def remove_comments(path, filename):
     taken from https://stackoverflow.com/questions/1769332/script-to-remove-python-comments-docstrings/1769577#1769577
     with little tweaks
     '''
-    #TODO deletes string that shouldn't be deleted
-    #     particularly in package PyYAML-6.0
     os.chdir(path)
     
     source = open(filename)
@@ -58,11 +56,13 @@ def url_in_prints(cfile):
         content = file.read()
     tree = ast.parse(content)
     calls = get_func_calls(tree)
+
     for func in calls:
-        if 'print' or 'textwrap.dedent' in func[0]:
+        if 'print' == func[0] or 'textwrap.dedent' == func[0]:
             try:
                 combined = '\t'.join(func)
-                if "url='https://" in combined or "url='http://" in combined or 'url="https://' in combined:
+                urls_in_prints = re.search('https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', combined)
+                if urls_in_prints is not None:
                     return True
             except:
                 pass
@@ -76,13 +76,11 @@ def url_in_setup(cfile):
     '''
     with open(cfile, 'r', encoding="utf-8") as file:
         content = file.read()
-    if "setup" in content:
-        for comb in url_combinations:
-            if comb in content:
-                return True
-    #content2 = content.split('setup(',1)[1]
-    #urls_in_setup = re.findall('https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', content)
-    #print(urls_in_setup)
+        
+    urls_in_setup = re.search('(?:download\_url|url)\s*=\s*\[?\s*["\']https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)["\']', content)
+    if urls_in_setup is not None:
+        return True
+    
     return False
 
 def manual_pip_install(cfile):
