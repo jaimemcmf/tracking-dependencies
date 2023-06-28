@@ -1,6 +1,6 @@
 '''some extra important functions'''
 import tokenize
-from called_functions import FuncCallVisitor, get_func_calls
+from called_functions import get_func_calls
 import ast
 import pickle
 import os
