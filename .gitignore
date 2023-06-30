@@ -1,3 +1,5 @@
 .DS_Store
 __pycache__
 last_visited.txt
+flagged_packages
+downloaded_packages

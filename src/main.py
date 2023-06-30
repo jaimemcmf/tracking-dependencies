@@ -19,8 +19,21 @@ try:
 except argparse.ArgumentError as e:
     print(e)
 
-path = os.getcwd()
-path = os.path.dirname(path)
+src = os.getcwd()
+root = os.path.dirname(src)
+
+os.chdir(root)
+
+if not os.path.isdir(root+'/flagged_packages'):
+    os.system('mkdir flagged_packages')
+
+if not os.path.isdir(root+'/downloaded_packages'):
+    os.system('mkdir downloaded_packages')
+
+if not os.path.isdir(root+'/checker'):
+    os.system('mkdir checker') 
+
+os.chdir(src)
 
 if args.download is not None:
     # -d flag
@@ -60,7 +73,7 @@ elif args.package is not None:
 
 elif args.checker is not None:
     # -c flag
-    path = path + '/checker'
+    path = root + '/checker'
     suspicious = False
 
     if args.checker in os.listdir(path) and os.path.isfile(path+'/'+args.checker) and pathlib.Path(path+'/'+args.checker).suffix == '.py':
@@ -75,7 +88,7 @@ elif args.checker is not None:
             print(f"{Fore.RED}This file is suspicious.{Style.RESET_ALL}")
 
         if not suspicious:
-            print(f"{Fore.GREEN}This file is seems to be safe.{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}This file seems to be safe.{Style.RESET_ALL}")
 
         os.remove(path + '/' + clean)
     else:
